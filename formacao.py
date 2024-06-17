@@ -1,6 +1,6 @@
 __all__ = [ 'inicializar', 'finalizar', 'get_formacao', 'get_formacoes', 'add_formacao', 'del_formacao' ]
 
-import json
+import json, atexit
 
 # Variaveis globais
 lista_formacoes = list()
@@ -91,6 +91,14 @@ def exibe_formacoes():
         print(formacao)
     print("\n")
 
-# testes
+# main
+erro = inicializar()
+if erro != 0:
+    print(erro)
+
+
+# Salvar turmas ao final do programa
+atexit.register(finalizar)
+
 
 
