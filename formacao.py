@@ -22,21 +22,28 @@ FORMACAO_NAO_ATIVO = 42
 
 # Funções para leitura de Json
 def inicializar() -> int:
-    global lista_cursos
+    global lista_formacoes, formacoes_deletadas
 
     try:
         with open(PATH, 'r') as arquivo:
             try:
-                lista_cursos = json.load(arquivo) ### verificar nos 2 arquivos
+                dados = json.load(arquivo) ### verificar nos 2 arquivos
             except json.JSONDecodeError: return ARQUIVO_EM_FORMATO_INVALIDO
     except FileNotFoundError: return ARQUIVO_NAO_ENCONTRADO
+
+    lista_formacoes = dados["lista_formacoes"]
+    formacoes_deletadas = dados["formacoes_deletadas"]
 
     return OPERACAO_REALIZADA_COM_SUCESSO
 
 def finalizar() -> int:
+    global lista_formacoes, formacoes_deletadas
+
+    dados = {"lista_formacoes": lista_formacoes, "formacoes_deletadas": formacoes_deletadas}
+
     try:
         with open(PATH, 'w') as arquivo:
-            json.dump(obj = lista_cursos, fp = arquivo, indent = 4) ### verificar nos 2 arquivos
+            json.dump(obj = dados, fp = arquivo, indent = 4) ### verificar nos 2 arquivos
     except OSError: return ERRO_NA_ESCRITA_DO_ARQUIVO
 
     return OPERACAO_REALIZADA_COM_SUCESSO
@@ -68,6 +75,10 @@ def add_formacao(nome: str, cursos: list[int]) -> tuple[int, int]:
         "nome": nome,
         "cursos": cursos
     }
+
+    for formacao in lista_formacoes:
+        if formacao["nome"] == nome:
+            return 41, None
         
     lista_formacoes.append(formacao)
     return OPERACAO_REALIZADA_COM_SUCESSO, id
@@ -87,9 +98,11 @@ def exibe_formacao(id):
     print(get_formacao(id))   
 
 def exibe_formacoes():
-    for formacao in lista_formacoes:
+    erro, lista = get_formacoes()
+    for formacao in lista:
         print(formacao)
-    print("\n")
+        print("\n")
+    return erro
 
 # main
 erro = inicializar()
@@ -99,6 +112,5 @@ if erro != 0:
 
 # Salvar turmas ao final do programa
 atexit.register(finalizar)
-
 
 
